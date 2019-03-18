@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/colorWhite"
+    tools:context=".MainActivity">
+
+    <android.support.v7.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:id="@+id/recycl"/>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:orientation="horizontal">
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:id="@+id/edittext1"
+            android:hint="Your message"
+            android:inputType="textMultiLine"
+            android:lines="3"
+            android:textSize="18dp"/>
+
+        <ImageButton
+            android:id="@+id/imgbutton"
+            android:layout_width="63dp"
+            android:layout_height="match_parent"
+            android:background="@color/colorWhite"
+            android:scaleType="fitXY"
+            android:src="@drawable/send_button2" />
+    </LinearLayout>
+
+
+</LinearLayout>

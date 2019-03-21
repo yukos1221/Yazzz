@@ -28,12 +28,13 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
 
     FirebaseDatabase database = FirebaseDatabase.getInstance();
-    DatabaseReference myRef = database.getReference("message");
+    DatabaseReference myRef = database.getReference("messages");
     Integer MAXLEN = 200;
     ImageButton imgbut;
     EditText edittext1;
     RecyclerView mMessagesRecycler;
-    String username="";
+    String username;
+
     ArrayList<String> my_fav_list = new ArrayList<>();
 
     @Override
@@ -51,15 +52,15 @@ public class MainActivity extends AppCompatActivity {
         imgbut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String HEHA = edittext1.getText().toString();
-                if (HEHA.equals("")) {
+                String ourmesg = edittext1.getText().toString();
+                if (ourmesg.equals("")) {
                     return;
                 }
-                if (HEHA.length() > MAXLEN) {
+                if (ourmesg.length() > MAXLEN) {
                     Toast.makeText(getApplicationContext(), "Your message is too long", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                myRef.push().setValue(HEHA);
+                myRef.push().setValue(username+"/46433643/"+ourmesg);
                 edittext1.setText("");
             }
         });
@@ -103,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    public boolean onCreateDialog() {
+    public void onCreateDialog() {
         LayoutInflater li = LayoutInflater.from(this);
         View promptsView = li.inflate(R.layout.prompt, null);
         AlertDialog.Builder mDialogBuilder = new AlertDialog.Builder(this);
@@ -119,6 +120,6 @@ public class MainActivity extends AppCompatActivity {
                             });
         AlertDialog alertDialog = mDialogBuilder.create();
         alertDialog.show();
-        return true;
+        return;
     }
 }

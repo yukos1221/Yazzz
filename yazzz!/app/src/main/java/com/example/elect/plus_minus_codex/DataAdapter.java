@@ -27,11 +27,24 @@ public class DataAdapter extends RecyclerView.Adapter<ViewHolder> {
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int i) {
         String msg = mesgs.get(i);
-        viewHolder.textview1.setText(msg);
+        viewHolder.textview0.setText(getName(msg));
+        viewHolder.textview1.setText(getMsg(msg));
     }
 
     @Override
     public int getItemCount() {
         return mesgs.size();
+    }
+
+    public String getName(String strng) {
+        int u = strng.indexOf("/46433643/");
+        String ret = strng.substring(0,u);
+        return ret;
+    }
+
+    public String getMsg(String strng) {
+        int u = strng.indexOf("/46433643/");
+        String ret = strng.substring(u+10);
+        return ret;
     }
 }

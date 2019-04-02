@@ -1,13 +1,23 @@
 package com.example.elect.plus_minus_codex;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,17 +33,23 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     DatabaseReference myRef = database.getReference("messages");
-    Integer MAXLEN = 200;
+    final Integer MAXLEN = 200;
+    private static final int NOTIFY_ID = 101;
     ImageButton imgbut;
     EditText edittext1;
     RecyclerView mMessagesRecycler;
-    String username;
+    String username = "";
+    private final static String FILE_NAME = "content.txt";
+    private NotificationManager nm;
 
     ArrayList<String> my_fav_list = new ArrayList<>();
 
@@ -43,7 +59,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         edittext1 = findViewById(R.id.edittext1);
         imgbut = findViewById(R.id.imgbutton);
-        onCreateDialog();
+        String maybename = openText();
+
+        if (maybename.equals(""))   onCreateDialog();
+        else username = maybename;
+
+        nm = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
         mMessagesRecycler = findViewById(R.id.recycl);
         mMessagesRecycler.setLayoutManager(new LinearLayoutManager(this));
         final DataAdapter dataadapter = new DataAdapter(this, my_fav_list);
@@ -60,6 +81,7 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "Your message is too long", Toast.LENGTH_SHORT).show();
                     return;
                 }
+
                 myRef.push().setValue(username+"/46433643/"+ourmesg);
                 edittext1.setText("");
             }
@@ -70,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
                 String msg = dataSnapshot.getValue(String.class);
                 my_fav_list.add(msg);
+                if ((!username.equals(""))&&(!getName(msg).equals(username))) createNotification();
                 dataadapter.notifyDataSetChanged();
                 mMessagesRecycler.smoothScrollToPosition(my_fav_list.size());
             }
@@ -98,8 +121,9 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         switch (id) {
-            case R.id.settings:
+            case R.id.settings: {
                 Toast.makeText(this, "You are beautiful", Toast.LENGTH_SHORT).show();
+            }
         }
         return true;
     }
@@ -116,10 +140,77 @@ public class MainActivity extends AppCompatActivity {
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
                                     username = userInput.getText().toString();
+                                    saveText(username);
                                 }
                             });
         AlertDialog alertDialog = mDialogBuilder.create();
         alertDialog.show();
         return;
+    }
+    public boolean createNotification() {
+        Notification.Builder builder = new Notification.Builder(this);
+        Intent intent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        builder
+                .setContentIntent(pendingIntent)
+                .setSmallIcon(R.mipmap.ic_launcher_round)
+                .setLargeIcon(BitmapFactory.decodeResource(getApplicationContext().getResources(), R.mipmap.ic_launcher_round))
+                .setTicker("New message")
+                .setContentTitle("Yazzz!")
+                .setContentText("There is new message")
+                .setAutoCancel(true);
+        Notification notification = builder.build();
+        nm.notify(NOTIFY_ID, notification);
+        return true;
+    }
+
+    public String getName(String strng) {
+        int u = strng.indexOf("/46433643/");
+        String ret = strng.substring(0,u);
+        return ret;
+    }
+    public void saveText(String text){
+        FileOutputStream fos = null;
+        try {
+            fos = openFileOutput(FILE_NAME, MODE_PRIVATE);
+            fos.write(text.getBytes());
+        }
+        catch(IOException ex) {
+            Toast.makeText(this, ex.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+        finally{
+            try{
+                if(fos!=null)
+                    fos.close();
+            }
+            catch(IOException ex){
+                Toast.makeText(this, ex.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    public String openText(){
+        FileInputStream fin = null;
+        try {
+            fin = openFileInput(FILE_NAME);
+            byte[] bytes = new byte[fin.available()];
+            fin.read(bytes);
+            String text = new String (bytes);
+            return text;
+        }
+        catch(IOException ex) {
+            Toast.makeText(this, ex.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+        finally{
+            try{
+                if(fin!=null)
+                    fin.close();
+            }
+            catch(IOException ex){
+                Toast.makeText(this, ex.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        }
+        return "";
     }
 }

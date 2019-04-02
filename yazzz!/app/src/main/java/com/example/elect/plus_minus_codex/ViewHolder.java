@@ -7,13 +7,13 @@ import android.widget.TextView;
 
 public class ViewHolder extends RecyclerView.ViewHolder {
 
-    TextView textview1;
-    TextView textview0;
+    TextView textviMesg;
+    TextView textviName;
     CardView card;
 
     public ViewHolder(View itemView) {
         super(itemView);
-        textview1 = itemView.findViewById(R.id.text_item);
-        textview0 = itemView.findViewById(R.id.nameid);
+        textviMesg = itemView.findViewById(R.id.text_item);
+        textviName = itemView.findViewById(R.id.nameid);
     }
 }

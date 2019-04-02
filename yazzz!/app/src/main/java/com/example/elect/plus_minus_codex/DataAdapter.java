@@ -27,8 +27,9 @@ public class DataAdapter extends RecyclerView.Adapter<ViewHolder> {
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int i) {
         String msg = mesgs.get(i);
-        viewHolder.textview0.setText(getName(msg));
-        viewHolder.textview1.setText(getMsg(msg));
+
+        viewHolder.textviName.setText(getName(msg));
+        viewHolder.textviMesg.setText(getMsg(msg));
     }
 
     @Override

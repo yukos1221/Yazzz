@@ -3,21 +3,17 @@ package com.example.elect.plus_minus_codex;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -48,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     EditText edittext1;
     RecyclerView mMessagesRecycler;
     String username = "";
+    boolean hah = true;
     private final static String FILE_NAME = "content.txt";
     private NotificationManager nm;
 
@@ -61,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
         imgbut = findViewById(R.id.imgbutton);
         String maybename = openText();
 
-        if (maybename.equals(""))   onCreateDialog();
+        if (maybename.equals(""))  createDialog();
         else username = maybename;
 
         nm = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
@@ -98,20 +95,13 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-            }
-
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {}
             @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-            }
-
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {}
             @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-            }
-
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {}
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-            }
+            public void onCancelled(@NonNull DatabaseError databaseError) {}
         });
     }
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -128,25 +118,45 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    public void onCreateDialog() {
+
+    public void createDialog() {
         LayoutInflater li = LayoutInflater.from(this);
         View promptsView = li.inflate(R.layout.prompt, null);
-        AlertDialog.Builder mDialogBuilder = new AlertDialog.Builder(this);
-        mDialogBuilder.setView(promptsView);
         final EditText userInput = promptsView.findViewById(R.id.input_text);
-            mDialogBuilder
-                    .setCancelable(false)
-                    .setPositiveButton("OK",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    username = userInput.getText().toString();
-                                    saveText(username);
-                                }
-                            });
-        AlertDialog alertDialog = mDialogBuilder.create();
-        alertDialog.show();
-        return;
+        final AlertDialog dialog = new AlertDialog.Builder(this)
+                .setView(promptsView)
+                .setPositiveButton(android.R.string.ok, null)
+                .create();
+
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+
+                Button button = (dialog).getButton(AlertDialog.BUTTON_POSITIVE);
+                button.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View view) {
+
+                        username = userInput.getText().toString();
+                        if (isCorrectUsername(username)) {
+                            saveText(username);
+                            dialog.dismiss();
+                        }
+                        else Toast.makeText(getApplicationContext(), "Your nickname is incorrect", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        });
+        dialog.show();
     }
+
+    public boolean isCorrectUsername(String somename) {
+        int leng = somename.length();
+        if ((leng>10)||(leng<3)) return false;
+        return true;
+    }
+
     public boolean createNotification() {
         Notification.Builder builder = new Notification.Builder(this);
         Intent intent = new Intent(this, MainActivity.class);

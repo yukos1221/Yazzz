@@ -1,5 +1,6 @@
 package com.example.elect.plus_minus_codex;
 
+import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -33,6 +34,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -44,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
     EditText edittext1;
     RecyclerView mMessagesRecycler;
     String username = "";
-    boolean hah = true;
     private final static String FILE_NAME = "content.txt";
     private NotificationManager nm;
 
@@ -89,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
                 String msg = dataSnapshot.getValue(String.class);
                 my_fav_list.add(msg);
-                if ((!username.equals(""))&&(!getName(msg).equals(username))) createNotification();
+                if (!isForeground(getApplicationContext())) createNotification();
                 dataadapter.notifyDataSetChanged();
                 mMessagesRecycler.smoothScrollToPosition(my_fav_list.size());
             }
@@ -104,10 +105,12 @@ public class MainActivity extends AppCompatActivity {
             public void onCancelled(@NonNull DatabaseError databaseError) {}
         });
     }
+
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
+
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         switch (id) {
@@ -117,7 +120,6 @@ public class MainActivity extends AppCompatActivity {
         }
         return true;
     }
-
 
     public void createDialog() {
         LayoutInflater li = LayoutInflater.from(this);
@@ -137,7 +139,6 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onClick(View view) {
-
                         username = userInput.getText().toString();
                         if (isCorrectUsername(username)) {
                             saveText(username);
@@ -160,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean createNotification() {
         Notification.Builder builder = new Notification.Builder(this);
         Intent intent = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         builder
                 .setContentIntent(pendingIntent)
@@ -175,11 +176,21 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    public String getName(String strng) {
-        int u = strng.indexOf("/46433643/");
-        String ret = strng.substring(0,u);
-        return ret;
+    public static boolean isForeground(Context context) {
+        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningAppProcessInfo> appProcesses = activityManager.getRunningAppProcesses();
+        if (appProcesses == null) {
+            return false;
+        }
+        final String packageName = context.getPackageName();
+        for (ActivityManager.RunningAppProcessInfo appProcess : appProcesses) {
+            if (appProcess.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND && appProcess.processName.equals(packageName)) {
+                return true;
+            }
+        }
+        return false;
     }
+
     public void saveText(String text){
         FileOutputStream fos = null;
         try {
@@ -210,7 +221,6 @@ public class MainActivity extends AppCompatActivity {
             return text;
         }
         catch(IOException ex) {
-            Toast.makeText(this, ex.getMessage(), Toast.LENGTH_SHORT).show();
         }
         finally{
             try{
@@ -218,7 +228,6 @@ public class MainActivity extends AppCompatActivity {
                     fin.close();
             }
             catch(IOException ex){
-                Toast.makeText(this, ex.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }
         return "";
